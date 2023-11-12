@@ -63,8 +63,14 @@
                         echo "<td>" . $row['course_id'] ."-". $row['section_id'] . "</td>";
                         echo "<td>" . $row['title'] . "</td>";
                         echo "<td>" . $row['capacity']."</td>";
-                        echo "<td><button class='enroll-button' onclick='enrollCourse(" . $row['course_id'] . "," . $row['section_id'] . ")'>Enroll</button></td>";
-                        echo "</tr>";
+                       // Display the "Enroll" button only if the student is not already enrolled
+                       if (!$isEnrolled) {
+                            echo "<td><button class='enroll-button' onclick='enrollCourse(\"$courseSectionId\")'>Enroll</button></td>";
+                        } else {
+                            echo "<td>Already Enrolled</td>";
+                        }
+
+                    echo "</tr>";
                         // ... display other relevant information ...
                     }
 
