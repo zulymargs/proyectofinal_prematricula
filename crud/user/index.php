@@ -52,7 +52,8 @@
                         $search_query = $_POST['search_query'];
                         // Modify your SQL query to include the search condition
                         $query = "SELECT * FROM course NATURAL JOIN section
-                                  WHERE course_id LIKE '%$search_query%'";
+                                  WHERE course_id LIKE '%$search_query%'
+                                  ORDER BY course_id ASC, section_id ASC";
 
                         // ... rest of the code ...
                         $result = $dbc->query($query);
