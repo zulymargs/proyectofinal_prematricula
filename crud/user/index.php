@@ -2,16 +2,15 @@
     $titulo = "Pre-Matrícula UPRA";
     session_start(); // Start the session
 
-// Check if the student is logged in
-    if (!isset($_SESSION['student_id'])) {
-        // Redirect to the login page if not authenticated
-        header("Location: ../login.php");
-        exit();
+    // Check if the user is logged in
+    if (isset($_SESSION['student_id'])) {
+        echo "<p>Welcome, Student ID: {$_SESSION['student_id']} | <a href='../logout.php'>Logout</a></p>";
+    } else {
+        echo "<p><a href='login.php'>Login</a></p>";
     }
 
     // Now you can use $_SESSION['student_id'] to get the logged-in student's ID
     $student_id = $_SESSION['student_id'];
-    echo "Logged in as student ID: $student_id";
 ?>
 <!DOCTYPE html>
 <html>
