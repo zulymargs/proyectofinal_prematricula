@@ -1,6 +1,3 @@
-<?php
-session_start(); // Start the session
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +12,8 @@ session_start(); // Start the session
         <h1>Sistema de Matrícula UPRA</h1>
 
         <?php
-        
+        session_start(); // Start the session
+        $_SESSION['test']='jijiji';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (!empty($_POST['admID']) && !empty($_POST['password'])) {
                 include_once("../db_info.php");
@@ -30,13 +28,16 @@ session_start(); // Start the session
 
                     if (password_verify($password, $row['password'])) {
                         $_SESSION['admID'] = $admID; // Store the admID in the session
+                        $_SESSION['admin_name'] = $row['admin_name'];
+                        $_SESSION['admin_lastnameP'] = $row['admin_lastnameP'];
+                        $_SESSION['admin_lastnameM'] = $row['admin_lastnameM'];
                         header('Location: index.php');
                         exit();
                     } else {
-                        echo "<p>Contraseña incorrecta</p>";
+                        echo '<h3>Contraseña incorrecta<br />Vuelva a intentarlo...<a href="login.php"> Login </a></h3>';
                     }
                 } else {
-                    echo '<h3>Su Numero de estudiante no concuerda con nuestros archivos!<br />Vuelva a intentarlo...<a href="login.php"> Login </a></h3>';
+                    echo '<h3>Su Numero de administrador no concuerda con nuestros archivos!<br />Vuelva a intentarlo...<a href="login.php"> Login </a></h3>';
                 }
 
                 $dbc->close();
@@ -54,6 +55,7 @@ session_start(); // Start the session
 
                 <button type="submit">Entrar!</button>
             </form>';
+            echo $_SESSION['test'];
         }
         ?>
     </div>
