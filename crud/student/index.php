@@ -22,11 +22,11 @@ function checkEnrollment($student_id, $course_id) {
 function getStatusLabel($status) {
     switch ($status) {
         case 0:
-            return "Pending";
+            return "Pendiente";
         case 1:
-            return "Enrolled";
+            return "Matriculado";
         case 2:
-            return "Cancelled";
+            return "Cancelado por cupo";
         default:
             return "Unknown";
     }
