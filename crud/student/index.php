@@ -11,6 +11,40 @@ if (isset($_SESSION['student_id'])) {
 
 // Now you can use $_SESSION['student_id'] to get the logged-in student's ID
 $student_id = $_SESSION['student_id'];
+
+function checkEnrollment($student_id, $course_id) {
+    global $dbc;
+    $query = "SELECT * FROM enrollment WHERE student_id = '$student_id' AND course_id = '$course_id'";
+    $result = $dbc->query($query);
+    return $result->num_rows > 0;
+}
+// Function to get a label based on the status
+function getStatusLabel($status) {
+    switch ($status) {
+        case 0:
+            return "Pending";
+        case 1:
+            return "Enrolled";
+        case 2:
+            return "Cancelled";
+        default:
+            return "Unknown";
+    }
+}
+function checkStatus($course_id, $section_id, $expectedStatus) {
+    global $dbc;
+
+    $query = "SELECT status FROM enrollment WHERE course_id = '$course_id' AND section_id = '$section_id' LIMIT 1";
+    $result = $dbc->query($query);
+
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return $row['status'] == $expectedStatus;
+    }
+
+    return false;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -49,7 +83,6 @@ $student_id = $_SESSION['student_id'];
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // ... existing code ...
 
             if (isset($_POST['search_query'])) {
                 $search_query = $_POST['search_query'];
@@ -71,7 +104,7 @@ $student_id = $_SESSION['student_id'];
         if ($result->num_rows > 0) {
             echo "<h3>Search Results:</h3>";
             echo "<table border='1'>";
-            echo "<tr><th>Course ID</th><th>Title</th><th>Availability</th><th>Enroll</th></tr>";
+            echo "<tr><th>Course ID</th><th>Title</th><th>Availability</th><th>Enroll?</th></tr>";
 
             // Loop through the results and display them in a table
             while ($row = $result->fetch_assoc()) {
@@ -79,22 +112,125 @@ $student_id = $_SESSION['student_id'];
                 echo "<td>" . $row['course_id'] . "-" . $row['section_id'] . "</td>";
                 echo "<td>" . $row['title'] . "</td>";
                 echo "<td>" . $row['capacity'] . "</td>";
+
+                
+                // Check if the student is already enrolled in the course
+                $isEnrolled = checkEnrollment($student_id, $row['course_id']);
+                
+
                 // Display the "Enroll" button only if the student is not already enrolled
                 if (!$isEnrolled) {
-                    echo "<td><button class='enroll-button' onclick='enrollCourse(\"$courseSectionId\")'>Enroll</button></td>";
+                    echo "<td>
+                            <form action='index.php' method='post'>
+                                <input type='hidden' name='enroll_course_id' value='{$row['course_id']}' />
+                                <input type='hidden' name='enroll_section_id' value='{$row['section_id']}' />
+                                <input type='submit' class='enroll-button' value='Enroll' />
+                            </form>
+                        </td>";
                 } else {
                     echo "<td>Already Enrolled</td>";
                 }
 
                 echo "</tr>";
-                // ... display other relevant information ...
             }
 
             echo "</table>";
         } else {
             echo "<p>No results found.</p>";
         }
+        // Check if the form was submitted for enrollment
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_POST['enroll_course_id']) && isset($_POST['enroll_section_id'])) {
+                $enroll_course_id = $_POST['enroll_course_id'];
+                $enroll_section_id = $_POST['enroll_section_id'];
+
+                // Check if the student is not already enrolled in the course
+                $isEnrolled = checkEnrollment($student_id, $enroll_course_id, $enroll_section_id);
+
+                if (!$isEnrolled) {
+                    // Perform the enrollment
+                    $enroll_query = "INSERT INTO enrollment (student_id, course_id, section_id, status) VALUES ('$student_id', '$enroll_course_id', '$enroll_section_id', 0)";
+
+                    if ($dbc->query($enroll_query)) {
+                        echo "<p>Enrolled successfully!</p>";
+                    } else {
+                        echo "<p>Error enrolling: " . $dbc->error . "</p>";
+                    }
+                } else {
+                    echo "<p>You are already enrolled in this course.</p>";
+                }
+            }
+        }
+
+        // Display enrolled courses for the current user
+        $enrolled_courses_query = "SELECT *
+        FROM enrollment
+        NATURAL JOIN course
+        NATURAL JOIN section
+        WHERE student_id = '$student_id'";
+
+        $enrolled_courses_result = $dbc->query($enrolled_courses_query);
+
+        if ($enrolled_courses_result->num_rows > 0) {
+        echo "<h3>Enrolled Courses:</h3>";
+        echo "<table border='1'>";
+        echo "<tr><th>Course ID</th><th>Title</th><th>Status</th><th>Disenroll?</th></tr>";
+
+        while ($enrolled_row = $enrolled_courses_result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>" . $enrolled_row['course_id'] . "-" . $enrolled_row['section_id'] . "</td>";
+        echo "<td>" . $enrolled_row['title'] . "</td>";
+        echo "<td>" . getStatusLabel($enrolled_row['status']) . "</td>";
+        // Check if the status is pending for disenroll button
+        if ($row['status'] == 0) {
+            // Display the "Disenroll" button
+            echo "<td>
+                    <form action='index.php' method='post'>
+                        <input type='hidden' name='disenroll_course_id' value='{$enrolled_row['course_id']}' />
+                        <input type='hidden' name='disenroll_section_id' value='{$enrolled_row['section_id']}' />
+                        <input type='submit' class='disenroll-button' value='Disenroll' />
+                    </form>
+                </td>";
+        } else {
+            // Display a message or an empty cell if not pending
+            echo "<td></td>";
+        }
+        echo "</tr>";
+        }
+
+        echo "</table><br>";
+        } else {
+        echo "<p>You are not enrolled in any courses.</p>";
+        }
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['disenroll_course_id']) && isset($_POST['disenroll_section_id'])) {
+            $disenroll_course_id = $_POST['disenroll_course_id'];
+            $disenroll_section_id = $_POST['disenroll_section_id'];
+        
+            // Check if the status is pending for disenrollment
+            $isPending = checkStatus($disenroll_course_id, $disenroll_section_id, 0);
+        
+            if ($isPending) {
+                // Perform the disenrollment
+                $disenroll_query = "DELETE FROM enrollment WHERE student_id = '$student_id' AND course_id = '$disenroll_course_id' AND section_id = '$disenroll_section_id'";
+        
+                if ($dbc->query($disenroll_query)) {
+                    echo "<p>Disenrolled successfully!</p>";
+                    header("Location: index.php");
+                    exit();
+                } else {
+                    echo "<p>Error disenrolling: " . $dbc->error . "</p>";
+                }
+            } else {
+                echo "<p>Cannot disenroll. The course is not pending.</p>";
+            }
+        }
+        
+
         ?>
     </div>
+    <footer>
+        CCOM4019 - Programación Web con PHP/MYSQL <br>
+        Creado por: Eddy Figueroa & Zulymar García
+    </footer>
 </body>
 </html>
