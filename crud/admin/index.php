@@ -79,6 +79,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
                 <td></td>
                 <td><input type="submit" class="formbutton" name="submit" value="Buscar Curso" /></td>
             </tr>
+            
         </form>
 
         <?php
@@ -191,6 +192,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         die("Error executing the query: " . $dbc->error);
     }
         ?>
+          <button><a href="crud/index.php" class="admin-button">Administrar Cursos y Secciones</a></button>
     </div>
     <footer>
         CCOM4019 - Programación Web con PHP/MYSQL <br>
