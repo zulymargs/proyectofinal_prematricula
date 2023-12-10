@@ -9,8 +9,50 @@ if (isset($_SESSION['admID'])) {
     echo "<p>Session not active <a href='login.php'>Login</a></p>";
 }
 
-// Now you can use $_SESSION['student_id'] to get the logged-in student's ID
-$student_id = $_SESSION['admID'];
+// Now you can use $_SESSION['admin_id'] to get the logged-in admin's ID
+$admin_id = $_SESSION['admID'];
+function checkAvailability($course_id, $section_id) {
+    global $dbc;
+
+    // Count the number of students enrolled in the specified course and section with status set to 1 (Matriculado)
+    $query = "SELECT COUNT(*) as enrolled_count FROM enrollment WHERE course_id = '$course_id' AND section_id = '$section_id' AND status = 1";
+    $result = $dbc->query($query);
+
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $enrolledCount = $row['enrolled_count'];
+
+        // Get the capacity of the section from the section table
+        $sectionCapacityQuery = "SELECT capacity FROM section WHERE course_id = '$course_id' AND section_id = '$section_id'";
+        $sectionCapacityResult = $dbc->query($sectionCapacityQuery);
+
+        if ($sectionCapacityResult && $sectionCapacityResult->num_rows > 0) {
+            $sectionCapacityRow = $sectionCapacityResult->fetch_assoc();
+            $sectionCapacity = $sectionCapacityRow['capacity'];
+
+            // Compare the number of enrolled students with the section capacity
+            return $enrolledCount < $sectionCapacity;
+        }
+    }
+
+    // If any query fails or no data is found, consider the section as unavailable
+    return false;
+}
+
+function checkStatus($course_id, $section_id, $expectedStatus) {
+    global $dbc;
+
+    $query = "SELECT status FROM enrollment WHERE course_id = '$course_id' AND section_id = '$section_id' LIMIT 1";
+    $result = $dbc->query($query);
+
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return $row['status'] == $expectedStatus;
+    }
+
+    return false;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -49,7 +91,6 @@ $student_id = $_SESSION['admID'];
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // ... existing code ...
 
             if (isset($_POST['search_query'])) {
                 $search_query = $_POST['search_query'];
@@ -71,7 +112,7 @@ $student_id = $_SESSION['admID'];
         if ($result->num_rows > 0) {
             echo "<h3>Search Results:</h3>";
             echo "<table border='1'>";
-            echo "<tr><th>Course ID</th><th>Title</th><th>Availability</th><th>Enroll Waitinglist</th></tr>";
+            echo "<tr><th>Course ID</th><th>Title</th><th>Availability</th><th>Enroll?</th></tr>";
 
             // Loop through the results and display them in a table
             while ($row = $result->fetch_assoc()) {
@@ -79,66 +120,73 @@ $student_id = $_SESSION['admID'];
                 echo "<td>" . $row['course_id'] . "-" . $row['section_id'] . "</td>";
                 echo "<td>" . $row['title'] . "</td>";
                 echo "<td>" . $row['capacity'] . "</td>";
-                $courseSectionId = $row['course_id'] . "-" . $row['section_id'];
-                // Display the "Enroll" button only if the student is not already enrolled
-                if (!$isEnrolled) {
-                    echo "<td><button class='enroll-button' onclick='enrollCourse(\"$courseSectionId\")'>OK</button></td>";
-                } else {
-                    echo "<td>Sección Llena</td>";
-                }
 
-                echo "</tr>";
-                // ... display other relevant information ...
-            }
+                
+                // Check if the section is still available for enrollment
+                $isAvailable = checkAvailability($row['course_id'], $row['section_id']);
+                
+
+                  // Display appropriate message based on availability
+                    if ($isAvailable) {
+                        echo "<td>
+                                <form action='index.php' method='post'>
+                                    <input type='hidden' name='enroll_course_id' value='{$row['course_id']}' />
+                                    <input type='hidden' name='enroll_section_id' value='{$row['section_id']}' />
+                                    <input type='submit' class='enroll-button' value='Enroll' />
+                                </form>
+                            </td>";
+                    } else {
+                        echo "<td>Sección Llena</td>";
+                    }
+
+                    echo "</tr>";
+                }
 
             echo "</table>";
         } else {
             echo "<p>No results found.</p>";
         }
-        // Process enrollment when the button is clicked
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['enroll_course'])) {
-            $courseSectionId = $_POST['enroll_course'];
-            list($courseId, $sectionId) = explode("-", $courseSectionId);
+        // Check if the form was submitted for enrollment
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if (isset($_POST['enroll_course_id']) && isset($_POST['enroll_section_id'])) {
+                $enroll_course_id = $_POST['enroll_course_id'];
+                $enroll_section_id = $_POST['enroll_section_id'];
 
-            // Step 1: Update Enrollment Status
-            $updateQuery = "UPDATE enrollment SET status = 1 WHERE course_id = '$courseId' AND section_id = '$sectionId'";
-            $dbc->query($updateQuery);
+                // Loop until the capacity is reached
+                while (checkAvailability($enroll_course_id, $enroll_section_id)) {
+                    // Update the status for the next enrolled student in the course and section
+                    $update_status_query = "UPDATE enrollment NATURAL JOIN student
+                                            SET status = 1
+                                            WHERE course_id = '$enroll_course_id'
+                                            AND section_id = '$enroll_section_id'
+                                            AND status = 0
+                                            ORDER BY year_of_study DESC, timestamp ASC
+                                            LIMIT 1";
 
-            // Step 2: Priority Logic
-            $priorityQuery = "SELECT e.student_id, s.year_of_study, e.timestamp
-                            FROM enrollment e
-                            JOIN student s ON e.student_id = s.student_id
-                            WHERE e.course_id = '$courseId' AND e.section_id = '$sectionId'
-                            ORDER BY s.year_of_study DESC, e.timestamp ASC";
-            $priorityResult = $dbc->query($priorityQuery);
-
-            // Step 3: Capacity Constraint
-            $sectionQuery = "SELECT capacity FROM section WHERE course_id = '$courseId' AND section_id = '$sectionId'";
-            $sectionResult = $dbc->query($sectionQuery);
-            $sectionRow = $sectionResult->fetch_assoc();
-            $capacity = $sectionRow['capacity'];
-
-            // Update the enrollment status based on priority and capacity
-            $count = 0;
-            while ($row = $priorityResult->fetch_assoc()) {
-                $studentId = $row['student_id'];
-                $updateQuery = "UPDATE enrollment SET status = 1 WHERE course_id = '$courseId' AND section_id = '$sectionId' AND student_id = '$studentId'";
-                $dbc->query($updateQuery);
-                $count++;
-
-                // Check if the maximum capacity is reached
-                if ($count >= $capacity) {
-                    break;
+                    if ($dbc->query($update_status_query)) {
+                        echo "<p>Status updated successfully!</p>";
+                    } else {
+                        echo "<p>Error updating status: " . $dbc->error . "</p>";
+                        break; // Break the loop if an error occurs
+                    }
                 }
+
+                // Update remaining status: 0 enrollments to status: 2
+                $update_remaining_query = "UPDATE enrollment
+                                          SET status = 2
+                                          WHERE course_id = '$enroll_course_id'
+                                          AND section_id = '$enroll_section_id'
+                                          AND status = 0";
+                $dbc->query($update_remaining_query);
             }
-
-            // Redirect or display a success message
-            header("Location: index.php");
-            exit();
-        }
-
-
+        }else {
+        die("Error executing the query: " . $dbc->error);
+    }
         ?>
     </div>
+    <footer>
+        CCOM4019 - Programación Web con PHP/MYSQL <br>
+        Creado por: Eddy Figueroa & Zulymar García
+    </footer>
 </body>
 </html>
