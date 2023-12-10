@@ -13,7 +13,6 @@
 
         <?php
         session_start(); // Start the session
-        $_SESSION['test']='jijiji';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (!empty($_POST['admID']) && !empty($_POST['password'])) {
                 include_once("../db_info.php");
@@ -55,7 +54,6 @@
 
                 <button type="submit">Entrar!</button>
             </form>';
-            echo $_SESSION['test'];
         }
         ?>
     </div>

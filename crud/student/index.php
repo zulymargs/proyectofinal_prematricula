@@ -169,6 +169,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         NATURAL JOIN section
         WHERE student_id = '$student_id'";
 
+
         $enrolled_courses_result = $dbc->query($enrolled_courses_query);
 
         if ($enrolled_courses_result->num_rows > 0) {
@@ -182,7 +183,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         echo "<td>" . $enrolled_row['title'] . "</td>";
         echo "<td>" . getStatusLabel($enrolled_row['status']) . "</td>";
         // Check if the status is pending for disenroll button
-        if ($row['status'] == 0) {
+        if ($row['status'] != 1) {
             // Display the "Disenroll" button
             echo "<td>
                     <form action='index.php' method='post'>
@@ -197,7 +198,6 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         }
         echo "</tr>";
         }
-
         echo "</table><br>";
         } else {
         echo "<p>You are not enrolled in any courses.</p>";
