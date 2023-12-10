@@ -152,8 +152,8 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
                 $enroll_course_id = $_POST['enroll_course_id'];
                 $enroll_section_id = $_POST['enroll_section_id'];
 
-                // Loop until the capacity is reached
-                while (checkAvailability($enroll_course_id, $enroll_section_id)) {
+                // Loop until the capacity is reached or no more availability
+                while ($isAvailable = checkAvailability($enroll_course_id, $enroll_section_id)) {
                     // Update the status for the next enrolled student in the course and section
                     $update_status_query = "UPDATE enrollment NATURAL JOIN student
                                             SET status = 1
@@ -163,8 +163,15 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
                                             ORDER BY year_of_study DESC, timestamp ASC
                                             LIMIT 1";
 
-                    if ($dbc->query($update_status_query)) {
-                        echo "<p>Status updated successfully!</p>";
+                    $result = $dbc->query($update_status_query);
+
+                    if ($result) {
+                        if ($result->num_rows > 0) {
+                            echo "<p>Status updated successfully!</p>";
+                        } else {
+                            // No more rows to update, exit the loop
+                            break;
+                        }
                     } else {
                         echo "<p>Error updating status: " . $dbc->error . "</p>";
                         break; // Break the loop if an error occurs
@@ -173,11 +180,12 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
 
                 // Update remaining status: 0 enrollments to status: 2
                 $update_remaining_query = "UPDATE enrollment
-                                          SET status = 2
-                                          WHERE course_id = '$enroll_course_id'
-                                          AND section_id = '$enroll_section_id'
-                                          AND status = 0";
+                                        SET status = 2
+                                        WHERE course_id = '$enroll_course_id'
+                                        AND section_id = '$enroll_section_id'
+                                        AND status = 0";
                 $dbc->query($update_remaining_query);
+
             }
         }else {
         die("Error executing the query: " . $dbc->error);
