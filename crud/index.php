@@ -67,7 +67,10 @@ session_start();
                 <input type="password" name="password" required />
 
                 <button type="submit">Entrar!</button>
-            </form>';
+            </form>
+            
+            
+            <a href="register_student.php"><button>Registrar nuevo estudiante</button></a> ';// Add registration button for students
         }
 
         function handleLogin($row, $role)
