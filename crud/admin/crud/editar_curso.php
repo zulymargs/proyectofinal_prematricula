@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+// Check if the user is logged in
+if (isset($_SESSION['admID'])) {
+    echo "<h2>Bienvenido, {$_SESSION['admin_lastnameP']} {$_SESSION['admin_lastnameM']}, {$_SESSION['admin_name']}| <a href='../logout.php'>Logout</a></h2>";
+} else {
+    echo "<p>Session not active <a href='../index.php'>Login</a></p>";
+}
+
 
 ?>
 
@@ -22,10 +29,10 @@ session_start();
         if (isset($_SESSION['admID'])) {
             include_once("../../db_info.php");
 
-            if (isset($_GET['course_id']) && is_numeric($_GET['course_id'])) {
+            if (isset($_GET['course_id'])) {
                 $courseId = $_GET['course_id'];
 
-                $query = "SELECT * FROM course WHERE course_id = $courseId";
+                $query = "SELECT * FROM course WHERE course_id = '$courseId'";
 
                 try {
                     if ($result = $dbc->query($query)) {
@@ -60,7 +67,7 @@ session_start();
                     echo "<h3 style='color:red;'>Error en el query: " . $dbc->error . "</h3>";
                 }
 
-            } elseif (isset($_POST['course_id']) && is_numeric($_POST['course_id'])) {
+            } elseif (isset($_POST['course_id'])) {
                 $title = htmlspecialchars($_POST['title'], ENT_QUOTES, 'UTF-8');
                 $credits = filter_input(INPUT_POST, 'credits', FILTER_VALIDATE_INT);
 
@@ -70,7 +77,7 @@ session_start();
 
                 $query = "UPDATE course 
                           SET title='$title', 
-                              credits=$credits
+                              credits='$credits'
                           WHERE course_id={$_POST['course_id']}";
 
                 try {
