@@ -6,7 +6,7 @@ $titulo = "Pre-Matrícula UPRA";
 if (isset($_SESSION['admID'])) {
     echo "<h2>Bienvenido, {$_SESSION['admin_lastnameP']} {$_SESSION['admin_lastnameM']}, {$_SESSION['admin_name']}| <a href='../logout.php'>Logout</a></h2>";
 } else {
-    echo "<p>Session not active <a href='login.php'>Login</a></p>";
+    echo "<p>Session not active <a href='../index.php'>Login</a></p>";
 }
 
 // Now you can use $_SESSION['admin_id'] to get the logged-in admin's ID

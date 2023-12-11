@@ -5,7 +5,7 @@ include_once("../../db_info.php");
 if (isset($_SESSION['admID'])) {
     echo "<h2>Bienvenido, {$_SESSION['admin_lastnameP']} {$_SESSION['admin_lastnameM']}, {$_SESSION['admin_name']}| <a href='../logout.php'>Logout</a></h2>";
 } else {
-    echo "<p>Session not active <a href='login.php'>Login</a></p>";
+    echo "<p>Session not active <a href='../../index.php'>Login</a></p>";
 }
 $limite = 4; // 4 records at a time
 $desde = isset($_GET['desde']) ? $_GET['desde'] : 0;
@@ -91,7 +91,7 @@ $pag_actual = ceil($desde / $limite) + 1;
             <?php endwhile; ?>
         </table>
 
-        <!-- Sections Table -->
+        <br>
         <h2>Secciones</h2>
         <table>
             <tr>
