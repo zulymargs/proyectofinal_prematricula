@@ -102,7 +102,7 @@ if (isset($_SESSION['admID'])) {
         }
         ?>
 
-        <h3><a href="index.php" class="centro">Ver cursos</a></h3>
+        <h3 class="admin-button"><a href="index.php" class="centro">Ver cursos</a></h3>
     </div>
 </body>
 

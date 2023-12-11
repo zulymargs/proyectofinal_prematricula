@@ -67,6 +67,6 @@ $dbc->close();
         <button type="submit">Insertar Curso</button>
     </form>
     
-    <a href="../index.php">Ver Cursos</a>
+    <a href="../index.php" class="admin-button">Ver Cursos</a>
 </body>
 </html>

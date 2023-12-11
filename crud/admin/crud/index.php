@@ -75,17 +75,16 @@ $pag_actual = ceil($desde / $limite) + 1;
             <tr>
                 <th>Course ID</th>
                 <th>Title</th>
-               
-                <th>Actions</th>
+                <th>Credits</th>
+                <th>Action</th>
             </tr>
             <?php while ($course = $coursesResult->fetch_assoc()) : ?>
                 <tr>
                     <td><?= $course['course_id']; ?></td>
                     <td><?= $course['title']; ?></td>
-                    
+                    <td><?= $course['credits']; ?></td>
                     <td class="action-links">
                         <a href="editar_curso.php?course_id=<?= $course['course_id']; ?>">Edit</a>
-                        <a href="eliminar_curso.php?course_id=<?= $course['course_id']; ?>">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -128,14 +127,19 @@ $pag_actual = ceil($desde / $limite) + 1;
             <?php if ($desde + $limite < $contador) : ?>
                 <a href="?desde=<?= min($contador - $limite, $desde + $limite); ?>">Next</a>
             <?php endif; ?>
-            <button><a href="insertar_curso.php" class="admin-button">Insertar curso</a></button>
-            <button><a href="insertar_seccion.php" class="admin-button">Insertar sección</a></button>
+            <br>
+            <a href="insertar_curso.php" class="admin-button">Insertar curso</a>
+            <a href="insertar_seccion.php" class="admin-button">Insertar sección</a>
             
-            <button><a href="../index.php" class="admin-button">Búsqueda de cursos</a></button>
+            <a href="../index.php" class="admin-button">Búsqueda de cursos</a>
 
         </div>
     </div>
 </body>
+<footer>
+        CCOM4019 - Programación Web con PHP/MYSQL <br>
+        Creado por: Eddy Figueroa & Zulymar García
+    </footer>
 </html>
 
 <?php

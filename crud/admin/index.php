@@ -193,7 +193,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         die("Error executing the query: " . $dbc->error);
     }
         ?>
-          <button><a href="crud/index.php" class="admin-button">Administrar Cursos y Secciones</a></button>
+          <a href="crud/index.php" class="admin-button">Administrar Cursos y Secciones</a>
     </div>
     <footer>
         CCOM4019 - Programación Web con PHP/MYSQL <br>
