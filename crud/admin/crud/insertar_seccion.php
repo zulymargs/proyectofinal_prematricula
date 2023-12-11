@@ -1,51 +1,89 @@
 <?php
-session_start(); // Start the session
-$titulo = "Agregar Sección";
+session_start();
+include_once("../../db_info.php");
 
 // Check if the user is logged in
 if (!isset($_SESSION['admID'])) {
-    header("Location: login.php"); // Redirect to the login page if not logged in
+    header("Location: ../../index.php");
     exit();
 }
 
-include_once("../../db_info.php");
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Validate and sanitize input data
+    // Note: You should add proper validation and sanitation here
 
-// Check if the form is submitted
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Process the form data (add section logic)
-    // ...
+    $course_id = $_POST['course_id'];
+    $section_id = $_POST['section_id']; // Added section_id
+    $capacity = $_POST['capacity'];
 
-    // After processing, you may redirect to the sections page or display a success message
+    // Validation 1: Los ID de sección deben constar de 3 caracteres.
+    if (strlen($section_id) !== 3) {
+        echo "Error: Los ID de sección deben constar de 3 caracteres.";
+        exit();
+    }
+
+    // Validation 2: La capacidad debe ser un número natural.
+    if (!ctype_digit($capacity) || $capacity <= 0) {
+        echo "Error: La capacidad debe ser un número natural.";
+        exit();
+    }
+
+    // Validation 3: No se puede insertar una sección a un curso que no exista en la tabla de cursos.
+    $checkCourseQuery = "SELECT * FROM course WHERE course_id = '$course_id'";
+    $checkCourseResult = $dbc->query($checkCourseQuery);
+
+    if ($checkCourseResult->num_rows === 0) {
+        echo "Error: No se puede insertar una sección a un curso que no exista en la tabla de cursos.";
+        exit();
+    }
+
+    // Perform the insertion
+    $insertQuery = "INSERT INTO section (course_id, section_id, capacity) VALUES ('$course_id', '$section_id', '$capacity')";
+    $result = $dbc->query($insertQuery);
+
+    if ($result) {
+        header("Location: ../index.php");
+        exit();
+    } else {
+        echo "Error: " . $dbc->error;
+    }
 }
+
+// Fetch courses for dropdown in the form
+$coursesQuery = "SELECT * FROM course";
+$coursesResult = $dbc->query($coursesQuery);
+
+// Close the database connection
+$dbc->close();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title><?php echo $titulo; ?></title>
-    <link rel="stylesheet" href="../php.css">
+    <meta charset="UTF-8">
+    <title>Insertar Sección</title>
+    <link rel="stylesheet" href="../../php.css">
 </head>
-
 <body>
-    <div>
-        <h1>Agregar Sección</h1>
+    <h1>Insertar Sección</h1>
+    
+    <form method="POST" action="">
+        <label for="course_id">Course:</label>
+        <select name="course_id" required>
+            <?php while ($course = $coursesResult->fetch_assoc()) : ?>
+                <option value="<?= $course['course_id']; ?>"><?= $course['title']; ?></option>
+            <?php endwhile; ?>
+        </select>
 
-        <!-- Form to add a section -->
-        <form action="add_section.php" method="post">
-            <!-- Section form fields go here -->
-            <label for="section_title">Título de la Sección:</label>
-            <input type="text" id="section_title" name="section_title" required />
+        <label for="section_id">Section ID:</label>
+        <input type="text" name="section_id" maxlength="3" required> 
 
-            <label for="capacity">Capacidad:</label>
-            <input type="text" id="capacity" name="capacity" required />
+        <label for="capacity">Capacity:</label>
+        <input type="text" name="capacity" required>
 
-            <!-- Add more fields as needed -->
-
-            <input type="submit" class="formbutton" name="submit" value="Agregar Sección" />
-        </form>
-        
-        <button onclick="location.href='index.php';">Volver a la Página Principal</button>
-    </div>
+        <button type="submit">Insertar Sección</button>
+    </form>
+    
+    <a href="../index.php">Ver Secciones</a>
 </body>
 </html>
