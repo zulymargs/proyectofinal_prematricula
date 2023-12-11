@@ -68,6 +68,7 @@ if (isset($_SESSION['admID'])) {
                 }
 
             } elseif (isset($_POST['course_id'])) {
+                $courseId = $_POST['course_id'];
                 $title = htmlspecialchars($_POST['title'], ENT_QUOTES, 'UTF-8');
                 $credits = filter_input(INPUT_POST, 'credits', FILTER_VALIDATE_INT);
 
@@ -78,7 +79,7 @@ if (isset($_SESSION['admID'])) {
                 $query = "UPDATE course 
                           SET title='$title', 
                               credits='$credits'
-                          WHERE course_id={$_POST['course_id']}";
+                          WHERE course_id='$courseId'";
 
                 try {
                     if ($dbc->query($query) === TRUE) {
