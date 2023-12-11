@@ -108,8 +108,8 @@ $pag_actual = ceil($desde / $limite) + 1;
                     <td><?= $section['capacity']; ?></td>
                     <td><?= $section['course_title']; ?></td>
                     <td class="action-links">
-                        <a href="editar_seccion.php?section_id=<?= $section['section_id']; ?>">Edit</a>
-                        <a href="eliminar_seccion.php?section_id=<?= $section['section_id']; ?>">Delete</a>
+                        <a href="editar_seccion.php?section_id=<?= $section['se_id']; ?>">Edit</a>
+                        <a href="eliminar_seccion.php?section_id=<?= $section['se_id']; ?>">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -128,8 +128,11 @@ $pag_actual = ceil($desde / $limite) + 1;
             <?php if ($desde + $limite < $contador) : ?>
                 <a href="?desde=<?= min($contador - $limite, $desde + $limite); ?>">Next</a>
             <?php endif; ?>
-            <a href='insertar_curso.php'>Insertar récord de estudiante de honor</a>
-            <a href='insertar_seccion.php'>Insertar récord de estudiante de honor</a>
+            <button><a href="insertar_curso.php" class="admin-button">Insertar curso</a></button>
+            <button><a href="insertar_seccion.php" class="admin-button">Insertar sección</a></button>
+            
+            <button><a href="../index.php" class="admin-button">Búsqueda de cursos</a></button>
+
         </div>
     </div>
 </body>
