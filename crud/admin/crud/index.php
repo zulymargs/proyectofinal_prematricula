@@ -108,8 +108,8 @@ $pag_actual = ceil($desde / $limite) + 1;
                     <td><?= $section['capacity']; ?></td>
                     <td><?= $section['course_title']; ?></td>
                     <td class="action-links">
-                        <a href="editar_seccion.php?section_id=<?= $section['se_id']; ?>">Edit</a>
-                        <a href="eliminar_seccion.php?section_id=<?= $section['se_id']; ?>">Delete</a>
+                        <a href="editar_seccion.php?se_id=<?= $section['se_id']; ?>">Edit</a>
+                        <a href="eliminar_seccion.php?se_id=<?= $section['se_id']; ?>">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
