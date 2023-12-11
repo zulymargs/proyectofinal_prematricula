@@ -43,10 +43,6 @@ if (isset($_SESSION['admID'])) {
                                 <form action="editar_seccion.php" method="post">
                                     <table border="0">
                                         <tr>
-                                            <td>Sección: </td>
-                                            <td><input type="text" name="section_id" value="' . $row['section_id'] . '" required></td>
-                                        </tr>
-                                        <tr>
                                             <td>Capacidad: </td>
                                             <td><input type="number" name="capacity" value="' . $row['capacity'] . '" required></td>
                                         </tr>
@@ -69,7 +65,7 @@ if (isset($_SESSION['admID'])) {
 
             } elseif (isset($_POST['se_id'])) {
                 $seId = $_POST['se_id'];
-                $section_id = htmlspecialchars($_POST['section_id'], ENT_QUOTES, 'UTF-8');
+                // $section_id = htmlspecialchars($_POST['section_id'], ENT_QUOTES, 'UTF-8');
                 $capacity = filter_input(INPUT_POST, 'capacity', FILTER_VALIDATE_INT);
 
                 if ($capacity <= 0 || !is_numeric($capacity)) {
@@ -77,8 +73,7 @@ if (isset($_SESSION['admID'])) {
                 }
 
                 $query = "UPDATE section 
-                          SET section_id='$section_id', 
-                            capacity='$capacity'
+                          SET  capacity='$capacity'
                           WHERE se_id='$seId'";
 
                 try {
