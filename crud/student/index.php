@@ -6,7 +6,7 @@ $titulo = "Pre-Matrícula UPRA";
 if (isset($_SESSION['student_id'])) {
     echo "<h2>Welcome, {$_SESSION['user_lastnameP']} {$_SESSION['user_lastnameM']}, {$_SESSION['user_name']}| <a href='../logout.php'>Logout</a></h2>";
 } else {
-    echo "<p>Session not active <a href='login.php'>Login</a></p>";
+    echo "<p>Session not active <a href='../index.php'>Login</a></p>";
 }
 
 // Now you can use $_SESSION['student_id'] to get the logged-in student's ID
