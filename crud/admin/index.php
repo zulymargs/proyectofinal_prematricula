@@ -110,7 +110,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
             }
         }
 
-        if ($result->num_rows > 0) {
+        if (isset($result) && $result->num_rows > 0) {
             echo "<h3>Search Results:</h3>";
             echo "<table border='1'>";
             echo "<tr><th>Course ID</th><th>Title</th><th>Availability</th><th>Enroll?</th></tr>";
