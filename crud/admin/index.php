@@ -168,9 +168,10 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
 
                     if ($result) {
                         if ($result->num_rows > 0) {
-                            echo "<p>Status updated successfully!</p>";
+                            // echo "<p>Status updated successfully!</p>";
                         } else {
                             // No more rows to update, exit the loop
+                            echo "<p>Status updated successfully!</p>";
                             break;
                         }
                     } else {
