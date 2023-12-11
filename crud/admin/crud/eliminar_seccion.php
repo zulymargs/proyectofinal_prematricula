@@ -20,10 +20,10 @@ if (!isset($_SESSION['admID'])) {
         <?php
         include_once("../../db_info.php");
 
-        if (isset($_GET['section_id']) && is_numeric($_GET['section_id'])) {
-            $section_id = $_GET['section_id'];
+        if (isset($_GET['se_id']) && is_numeric($_GET['se_id'])) {
+            $se_id = $_GET['se_id'];
 
-            $query = "SELECT * FROM section WHERE section_id = ?";
+            $query = "SELECT * FROM section WHERE se_id = ?";
 
             try {
                 $stmt = $dbc->prepare($query);
@@ -39,7 +39,7 @@ if (!isset($_SESSION['admID'])) {
                             <h3>¿Está seguro que desea eliminar la siguiente sección?: 
                             ' . htmlspecialchars($row['course_id']) . ' - ' . $row['section_id'] . ' - ' . $row['capacity'] . '?</h3>';
 
-                        echo '<input type="hidden" name="section_id" value="' . $section_id . '" />';
+                        echo '<input type="hidden" name="se_id" value="' . $se_id . '" />';
                         echo '<div style="text-align:center;"><input type="submit" name="submit" value="Eliminar sección" /></div></form>';
                     } else {
                         echo '<h3 style="color:red;">Error, la sección no se encontró en la tabla</h3>';
@@ -48,8 +48,8 @@ if (!isset($_SESSION['admID'])) {
             } catch (Exception $e) {
                 echo '<h3 style="color:red;">Error en el query: ' . $e->getMessage() . '</h3>';
             }
-        } elseif (isset($_POST['section_id']) && is_numeric($_POST['section_id'])) {
-            $section_id = $_POST['section_id'];
+        } elseif (isset($_POST['se_id']) && is_numeric($_POST['se_id'])) {
+            $se_id = $_POST['se_id'];
 
             // Start a transaction for atomicity
             $dbc->begin_transaction();
