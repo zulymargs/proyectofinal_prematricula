@@ -66,11 +66,11 @@ session_start();
                 <label for="password">Contraseña:</label>
                 <input type="password" name="password" required />
 
-                <button type="submit">Entrar!</button>
+                <button type="submit"class="sub" >Entrar!</button>
             </form>
             
             
-            <a href="register_student.php"><button>Registrar nuevo estudiante</button></a> ';// Add registration button for students
+            <a href="register_student.php" class="button">Registrar nuevo estudiante</a> ';// Add registration button for students
         }
 
         function handleLogin($row, $role)

@@ -64,13 +64,13 @@ function checkStatus($course_id, $section_id, $allowedStatusArray) {
         <form action="index.php" method="post">
             <!-- ... existing form fields ... -->
             <tr>
-                <td width="140" align="right">Buscar curso:</td>
+                <td width="140" align="right" class="sub">Buscar curso:</td>
                 <td><input type="text" name="search_query" size="50" maxlength="255" /></td>
             </tr>
             <!-- ... existing form fields ... -->
             <tr>
                 <td></td>
-                <td><input type="submit" class="formbutton" name="submit" value="Buscar Curso" /></td>
+                <td><input type="submit" class="sub" name="submit" value="Buscar Curso" /></td>
             </tr>
         </form>
 
