@@ -31,7 +31,7 @@ function getStatusLabel($status) {
             return "Unknown";
     }
 }
-function checkStatus($course_id, $section_id, $expectedStatus) {
+function checkStatus($course_id, $section_id, $allowedStatusArray) {
     global $dbc;
 
     $query = "SELECT status FROM enrollment WHERE course_id = '$course_id' AND section_id = '$section_id' LIMIT 1";
@@ -39,11 +39,12 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
 
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        return $row['status'] == $expectedStatus;
+        return in_array($row['status'], $allowedStatusArray);
     }
 
     return false;
 }
+
 
 ?>
 
@@ -182,8 +183,8 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         echo "<td>" . $enrolled_row['course_id'] . "-" . $enrolled_row['section_id'] . "</td>";
         echo "<td>" . $enrolled_row['title'] . "</td>";
         echo "<td>" . getStatusLabel($enrolled_row['status']) . "</td>";
-        // Check if the status is pending for disenroll button
-        if ($row['status'] != 1) {
+        // Check if the status is pending or canceled for disenroll button
+        if ($enrolled_row['status'] == 0 || $enrolled_row['status'] == 2) {
             // Display the "Disenroll" button
             echo "<td>
                     <form action='index.php' method='post'>
@@ -194,7 +195,7 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
                 </td>";
         } else {
             // Display a message or an empty cell if not pending
-            echo "<td></td>";
+            echo "<td>No puede hacer cambios</td>";
         }
         echo "</tr>";
         }
@@ -205,9 +206,11 @@ function checkStatus($course_id, $section_id, $expectedStatus) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['disenroll_course_id']) && isset($_POST['disenroll_section_id'])) {
             $disenroll_course_id = $_POST['disenroll_course_id'];
             $disenroll_section_id = $_POST['disenroll_section_id'];
+
+            $allowedStatusArray = array(0, 2);
         
             // Check if the status is pending for disenrollment
-            $isPending = checkStatus($disenroll_course_id, $disenroll_section_id, 0);
+            $isPending = checkStatus($disenroll_course_id, $disenroll_section_id, $allowedStatusArray);
         
             if ($isPending) {
                 // Perform the disenrollment
