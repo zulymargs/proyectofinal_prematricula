@@ -3,7 +3,7 @@ session_start();
 include_once("../../db_info.php");
 // Check if the user is logged in
 if (isset($_SESSION['admID'])) {
-    echo "<h2>Bienvenido, {$_SESSION['admin_lastnameP']} {$_SESSION['admin_lastnameM']}, {$_SESSION['admin_name']}| <a href='../logout.php'>Logout</a></h2>";
+    echo "<h2>Bienvenido, {$_SESSION['admin_lastnameP']} {$_SESSION['admin_lastnameM']}, {$_SESSION['admin_name']}| <a href='../../logout.php'>Logout</a></h2>";
 } else {
     echo "<p>Session not active <a href='../../index.php'>Login</a></p>";
 }
